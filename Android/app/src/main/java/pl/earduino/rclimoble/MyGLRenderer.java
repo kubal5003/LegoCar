@@ -69,7 +69,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLU.gluLookAt(gl, 0, 0, -4, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
 
-        processSteeringWheelAutoReturn();
+        //processSteeringWheelAutoReturn();
 
         gl.glTranslatef(1.5f, 0.0f, 0.0f);
         gl.glRotatef(mAngle, 0.0f, 0.0f, 1.0f);
@@ -79,9 +79,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         GLU.gluLookAt(gl, 0, 0, -4, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         gl.glTranslatef(-1.5f, 0.0f, 0.0f);
         mPads.draw(gl);
-
-
-
 
     }
 

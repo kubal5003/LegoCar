@@ -14,15 +14,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import pl.earduino.rclimoble.Events.SteeringListener;
+import pl.earduino.rclimoble.Events.SteeringPositionEvent;
 
-public class MainActivity extends Activity {
+
+public class MainActivity extends Activity implements SteeringListener {
     private static final  String TAG = MainActivity.class.getSimpleName();
     public static final String EXTRAS_DEVICE_NAME = "1";
     public static final String EXTRAS_DEVICE_ADDRESS = "2";
-    private String mDeviceName = "RCLIMO";
     private String mDeviceAddress;
     private boolean mConnected = false;
     private GLSurfaceView mGLView;
+    private GyroscopeSteering mGyroscopeSteering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +35,13 @@ public class MainActivity extends Activity {
         setTitle("Remote Control Lego");
         final Intent intent = getIntent();
 
-        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
-      //  final TextView textView = (TextView)findViewById(R.id.DeviceNameTextView);
-       // textView.setText(mDeviceName);
+        try {
+            mGyroscopeSteering = new GyroscopeSteering(this, this);
+        } catch (Exception e) {
+            finish();
+        }
 
         Intent bluetoothServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(bluetoothServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -121,7 +126,9 @@ public class MainActivity extends Activity {
             final boolean result = getmBluetoothLeService().connect(mDeviceAddress);
             Log.d(TAG, "Connect request result=" + result);
         }
+
         mGLView.onResume();
+        mGyroscopeSteering.start();
     }
 
     @Override
@@ -129,6 +136,7 @@ public class MainActivity extends Activity {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
         mGLView.onPause();
+        mGyroscopeSteering.stop();
     }
 
     @Override
@@ -195,5 +203,10 @@ public class MainActivity extends Activity {
             getmBluetoothLeService().sendText(cmd + ";");
             Log.i("BLUETOOTH",cmd);
         }
+    }
+
+    @Override
+    public void steeringPositionChange(SteeringPositionEvent event) {
+        setSteeringWheelPosition(event.getPosition());
     }
 }
